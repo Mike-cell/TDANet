@@ -176,7 +176,7 @@ class DilatedConvNorm(nn.Module):
         output = self.conv(input)
         return self.norm(output)
 
-
+# transformer的FFN层
 class FFN(nn.Module):
     def __init__(self, in_features, hidden_size, drop=0.1):
         super().__init__()
@@ -197,6 +197,7 @@ class FFN(nn.Module):
         x = self.drop(x)
         return x
 
+# 全局transformer
 class GA(nn.Module):
     def __init__(self, in_chan, out_chan, drop_path) -> None:
         super().__init__()
