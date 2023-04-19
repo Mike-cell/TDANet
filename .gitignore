@@ -1,6 +1,4 @@
 ignore/
 .github
 README.md
-LICENSE
-results.png
-README.md
+data/audio/

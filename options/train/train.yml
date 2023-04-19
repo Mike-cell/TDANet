@@ -1,6 +1,6 @@
 #### Conv-TasNet Setting
 name: Conv_Tasnet
-gpu_ids: [0,]
+gpu_ids: [0, 1]
 #gpu_ids: [0]
 epochs: 100
 
@@ -33,7 +33,7 @@ train:
   logging_period: 200
   clip_norm: 200
   num_epochs: 100
-  checkpoint: Conv-TasNet-new
+  checkpoint: TDA-new
 
 optimizer_kwargs:
   lr: !!float 1e-3
