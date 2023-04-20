@@ -7,7 +7,7 @@ import argparse
 from torch.nn.parallel import data_parallel
 from Conv_TasNet import ConvTasNet
 from utils import get_logger
-from option import parse
+from options.option import parse
 import tqdm
 
 

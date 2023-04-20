@@ -35,6 +35,7 @@ def write_wav(fname, src, sample_rate):
     torchaudio.save(fname, src, sample_rate)
 
 
+# 可迭代可下标引用的类，每次迭代或下标引用会返回一个audio数据
 class AudioReader(object):
     '''
         Class that reads Wav format files
@@ -42,12 +43,13 @@ class AudioReader(object):
         Output a matrix of wav files in all scp files.
     '''
 
-    def __init__(self, scp_path, sample_rate=8000):
+    def __init__(self, scp_path, sample_rate=16000):
         super(AudioReader, self).__init__()
         self.sample_rate = sample_rate
         self.index_dict = handle_scp(scp_path)
         self.keys = list(self.index_dict.keys())
 
+    # load audio and check audio rate，then return audio data
     def _load(self, key):
         src, sr = read_wav(self.index_dict[key], return_rate=True)
         if self.sample_rate is not None and sr != self.sample_rate:
@@ -55,13 +57,16 @@ class AudioReader(object):
                 sr, self.sample_rate))
         return src
 
+    # reload __len__ funtion, return the number of keys 
     def __len__(self):
         return len(self.keys)
 
+    # allow iter, each iter return a piece of audio data
     def __iter__(self):
         for key in self.keys:
             yield key, self._load(key)
 
+    # 允许通过下标或key索引直接获取数据
     def __getitem__(self, index):
         if type(index) not in [int, str]:
             raise IndexError('Unsupported index type: {}'.format(type(index)))
@@ -78,6 +83,6 @@ class AudioReader(object):
 
 
 if __name__ == "__main__":
-    r = AudioReader('/home/likai/data1/create_scp/cv_s2.scp')
+    r = AudioReader('data\path\cv_all.scp')
     index = 0
-    print(r[1])
+    print(r[10])
