@@ -183,6 +183,7 @@ class Trainer():
             self.cur_epoch, self.optimizer.param_groups[0]['lr'], total_loss_avg, (end-start)/60))
         return total_loss_avg
 
+    # 验证函数
     def val(self, val_dataloader):
         '''
            validation model
@@ -210,6 +211,7 @@ class Trainer():
             self.cur_epoch, self.optimizer.param_groups[0]['lr'], total_loss_avg, (end-start)/60))
         return total_loss_avg
 
+    # 执行训练并验证的函数
     def run(self, train_dataloader, val_dataloader):
         train_losses = []
         val_losses = []

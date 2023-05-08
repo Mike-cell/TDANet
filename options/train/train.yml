@@ -33,7 +33,7 @@ train:
   logging_period: 200
   clip_norm: 200
   num_epochs: 100
-  checkpoint: TDA-new
+  checkpoint: train_log\checkpoint
 
 optimizer_kwargs:
   lr: !!float 1e-3
@@ -56,5 +56,5 @@ net_conf:
 
 #### resume model
 resume:
-  path: /home/likai/data1/Conv-TasNet
+  path: train_log\checkpoint
   resume_state: false

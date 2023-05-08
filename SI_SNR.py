@@ -2,6 +2,7 @@ import torch
 from itertools import permutations
 
 
+# 单个人单个语音的SI_SNR
 def SI_SNR(_s, s, zero_mean=True):
     '''
          Calculate the SNR indicator between the two audios. 
@@ -18,6 +19,7 @@ def SI_SNR(_s, s, zero_mean=True):
     s_target = sum(torch.mul(_s, s))*s/torch.pow(torch.norm(s, p=2), 2)
     e_noise = _s - s_target
     return 20*torch.log10(torch.norm(s_target, p=2)/torch.norm(e_noise, p=2))
+
 
 
 def permute_SI_SNR(_s_lists, s_lists):
@@ -40,6 +42,7 @@ def permute_SI_SNR(_s_lists, s_lists):
     return max(results)
 
 
+# 以batchsize为操作单位的SI_SNR
 def sisnr(x, s, eps=1e-8):
     """
     calculate training loss
@@ -65,6 +68,7 @@ def sisnr(x, s, eps=1e-8):
     return 20 * torch.log10(eps + l2norm(t) / (l2norm(x_zm - t) + eps))
 
 
+# 计算排列以后的 loss, 其中的 SI_SNR 以 batchsize 为操作单位
 def si_snr_loss(ests, egs):
     # spks x n x S
     refs = egs["ref"]

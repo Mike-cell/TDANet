@@ -105,15 +105,7 @@ import matplotlib.pyplot as plt
 import threading
 import keyboard
 import wave
-import os
-from datetime import datetime
 
-
-# 获得系统时间
-now = datetime.now()
-f = now.strftime("%Y-%m-%d_%H-%M-%S")
-filepath = os.path.join('beamformer\\channels4', f)
-os.mkdir(filepath)
 
 # 检测计算机上的麦克风设备
 def search_device():
@@ -132,39 +124,34 @@ search_device()
 
 # 设置录音参数
 FORMAT = pyaudio.paInt16
-CHANNELS = 2
+CHANNELS = 4
 RATE = 16000
 CHUNK = 2048
 DEVICE = 1
-SECORD = 10
-DATA = SECORD * RATE
+
 # 创建PyAudio对象
 p = pyaudio.PyAudio()
 
 # 创建绘图窗口
-fig, ax = plt.subplots(CHANNELS)
+fig, ax = plt.subplots(4)
 
-line = [[],]
-for i in range(CHANNELS-1):
-    line.append([])
-    
+line = [[], [], [], []]
 for i in range(len(ax)):
     line[i], = ax[i].plot([], [])
-    ax[i].set_ylim(-30000, 30000)
-    ax[i].set_xlim(0, SECORD)
+    ax[i].set_ylim(-10000, 10000)
+    ax[i].set_xlim(0, 48000)
 
 # 定义全局变量，用于控制录音状态
 recording = False
-data = np.array([[],], dtype=np.int16)
-for i in range(CHANNELS - 1):
-    data = np.concatenate((data, np.array([[],], dtype=np.int16)), axis=0)
+data = np.array([[], [], [], []], dtype=np.int16)
 show = 0
-# WAVE_OUTPUT_FILENAME = []
+
 # 定义回调函数
+import time 
 def callback(in_data, frame_count, time_info, status):
     global recording
     global data
-    # global WAVE_OUTPUT_FILENAME
+    
     if recording:
         # 将二进制音频数据转换为numpy数组
         audio_data = np.frombuffer(in_data, dtype=np.int16)
@@ -172,37 +159,37 @@ def callback(in_data, frame_count, time_info, status):
         audio_data = audio_data.reshape(-1, CHANNELS).T
         data = np.concatenate((data, audio_data), axis=1)
         
-        if len(data[0]) > DATA:
-            data = data[:, -DATA:]
-        # print(data.shape)
+        if len(data[0]) > 48000:
+            data = data[:, -48000:]
+        print(data.shape)
         # 绘制音频数据的波形图
+     
+        # for i in range(len(line)):
+        #     line[i].set_data(range(len(data[i])), data[i])
+            # ax[i].relim()
+            # ax[i].autoscale_view()
+        # time.sleep(0.01)
         global show 
         show += 1
-        if show % 5 == 0:
+        if show >= 20:
             for i in range(len(line)):
-                line[i].set_data(np.linspace(0, SECORD, len(data[i])), data[i])
+                line[i].set_data(range(len(data[i])), data[i])
             fig.canvas.draw()
             fig.canvas.flush_events()
-            
+            show = 0
 
             # 将录制的音频数据写入 wav 文件
-            path = os.path.join(filepath, 'x_channel.wav') 
-            
-            if show % 20 == 0:
-                for i in range(CHANNELS):
-                    
-                    WAVE_OUTPUT_FILENAME = path.replace('x', str(i))
-                    wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-                    wf.setnchannels(1)
-                    wf.setsampwidth(p.get_sample_size(FORMAT))
-                    wf.setframerate(RATE)
-                    # data[i] = np.ascontiguousarray(data[i])
-                    wf.writeframes(data[i].tostring())
-                    wf.close()
-                print(recording)
-                print("音频已保存为 ", WAVE_OUTPUT_FILENAME)
-                plt.savefig(path.replace('x_channel.wav', 'wave.png'), dpi=300, bbox_inches='tight')
-                show = 0
+            path = 'microphone\\4chanals\\171103\\x_channal.wav'
+            WAVE_OUTPUT_FILENAME = [path.replace('x', str(i)) for i in range(CHANNELS)]
+            for i, wavefile in enumerate(WAVE_OUTPUT_FILENAME):
+                wf = wave.open(wavefile, 'wb')
+                wf.setnchannels(1)
+                wf.setsampwidth(p.get_sample_size(FORMAT))
+                wf.setframerate(RATE)
+                wf.writeframes(data[i])
+                wf.close()
+            print("音频已保存为 ", WAVE_OUTPUT_FILENAME)
+            # plt.savefig("microphone\\4chanals\\171103\\wav.png", dpi=300, bbox_inches='tight')
         # 返回录音数据，继续录音
         return (in_data, pyaudio.paContinue)
     else:
@@ -218,40 +205,24 @@ def start_recording():
                     frames_per_buffer=CHUNK, stream_callback=callback,
                     input_device_index=DEVICE)
     
-    
+    stream.start_stream()
     recording = True
     
     while recording:
         # 等待按键停止录音
         keyboard.wait('esc')
-       
     # 停止录音并关闭音频流
     stream.stop_stream()
     stream.close()
 
-import time
-
-def run_keyboard():
-    global recording
-    time.sleep(0.001 )
-    while True:
-        if keyboard.is_pressed('esc'):
-            recording = False
-            
-            break
-
 # 创建线程，用于开始录音
 record_thread = threading.Thread(target=start_recording)
-# record_thread1 = threading.Thread(target=run_keyboard)
 
 
 # 按下空格键开始录音，再次按下停止录音
-# keyboard.add_hotkey('esc', lambda: setattr(record_thread, " ", False))
 keyboard.add_hotkey('space', record_thread.start)
-# record_thread1.start()
 
-# # 开始监听热键
-# keyboard.wait()
+keyboard.add_hotkey('esc', lambda: setattr(record_thread, "recording", False))
 
 
 # 显示音频波形图

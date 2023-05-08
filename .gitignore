@@ -2,3 +2,7 @@ ignore/
 .github
 README.md
 data/audio/
+Recording/
+train_log/
+Recording/
+
